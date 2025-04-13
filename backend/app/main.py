@@ -2,11 +2,15 @@ from fastapi import FastAPI
 from app.core.database import SessionLocal
 from app.services.crypto_service import get_top_10_cryptos
 from app.crud.crypto import upsert_cryptos
-from app.routes import db_view  # ⬅️ جدید
+from app.routes import db_view, auth
+
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = FastAPI()
 
-app.include_router(db_view.router)  # ⬅️ اضافه کردن route
+# ⬇️ Routerها
+app.include_router(db_view.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def root():
@@ -14,17 +18,33 @@ def root():
 
 @app.post("/cryptos/update")
 def update_cryptos():
-    print("📥 [INFO] Update started")
+    print("📥 [MANUAL SYNC] Started")
     db = SessionLocal()
     try:
         cryptos = [c.dict() for c in get_top_10_cryptos()]
-        print("✅ [INFO] Got data from API")
         upsert_cryptos(cryptos, db)
-        print("💾 [INFO] Data saved to DB")
+        print("✅ [MANUAL SYNC] Data synced")
     except Exception as e:
         print(f"❌ [ERROR] {e}")
         return {"error": str(e)}
     finally:
         db.close()
-        print("🔚 [INFO] DB session closed")
-    return {"message": "Data synced to DB"}
+    return {"message": "Manual sync complete"}
+
+# ⏰ تابع sync زمان‌بندی‌شده
+def scheduled_sync():
+    print("⏰ [AUTO SYNC] Started")
+    db = SessionLocal()
+    try:
+        cryptos = [c.dict() for c in get_top_10_cryptos()]
+        upsert_cryptos(cryptos, db)
+        print("✅ [AUTO SYNC] Data synced")
+    except Exception as e:
+        print(f"❌ [AUTO SYNC ERROR] {e}")
+    finally:
+        db.close()
+
+# 🗓️ Scheduler
+scheduler = BackgroundScheduler()
+scheduler.add_job(scheduled_sync, 'interval', minutes=5)
+scheduler.start()
