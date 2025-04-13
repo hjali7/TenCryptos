@@ -2,8 +2,11 @@ from fastapi import FastAPI
 from app.core.database import SessionLocal
 from app.services.crypto_service import get_top_10_cryptos
 from app.crud.crypto import upsert_cryptos
+from app.routes import db_view  # ⬅️ جدید
 
 app = FastAPI()
+
+app.include_router(db_view.router)  # ⬅️ اضافه کردن route
 
 @app.get("/")
 def root():
