@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import SessionLocal
 from app.services.crypto_service import get_top_10_cryptos
 from app.crud.crypto import upsert_cryptos
@@ -8,6 +9,15 @@ from app.core import aws
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = FastAPI()
+
+# ✅ اضافه کردن CORS برای توسعه فرانت
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(db_view.router)
 app.include_router(logs.router)
