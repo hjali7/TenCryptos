@@ -1,40 +1,49 @@
-
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
     container_name: tencryptos-backend
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://tencryptos:alihaji@tencryptos-postgres:5432/tencryptosdb
-    volumes:
-      - ./backend/app:/app/app
-      - ./backend/logs:/app/logs
     depends_on:
       - db
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     networks:
-      - tencryptos-net
+      - tencryptos_net
 
   db:
     image: postgres:15
-    container_name: tencryptos-postgres
-    restart: always
+    container_name: tencryptos-db
     environment:
       POSTGRES_USER: tencryptos
-      POSTGRES_PASSWORD: alihaji
+      POSTGRES_PASSWORD: devpass
       POSTGRES_DB: tencryptosdb
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - tencryptos-net
+      - tencryptos_net
+
+  frontend:
+    build: ./frontend
+    container_name: tencryptos-frontend
+    depends_on:
+      - backend
+    networks:
+      - tencryptos_net
+
+  nginx:
+    image: nginx:latest
+    container_name: tencryptos-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - tencryptos_net
 
 volumes:
-  pgdata:
+  postgres_data:
 
 networks:
-  tencryptos-net:
+  tencryptos_net:
