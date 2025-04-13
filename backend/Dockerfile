@@ -1,13 +1,14 @@
 FROM python:3.11-slim
 
+# ایجاد دایرکتوری کاری
 WORKDIR /app
 
-COPY requirements.txt .
+# کپی فایل‌های مورد نیاز و نصب وابستگی‌ها
+COPY ./requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV PYTHONPATH=/app
-# Copy the entire app directory to the container
+# کپی کل پروژه
+COPY . /app
 
-COPY app ./app
-
+# اجرا با uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
