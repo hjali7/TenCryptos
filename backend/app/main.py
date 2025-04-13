@@ -1,7 +1,6 @@
 from fastapi import FastAPI
+from app.routes import crypto
 
 app = FastAPI()
 
-@app.get("/ping")
-def ping():
-    return {"message": "TenCryptos backend is alive!"}
+app.include_router(crypto.router)
