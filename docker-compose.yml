@@ -1,0 +1,38 @@
+services:
+  backend:
+    build: ./backend
+    container_name: tencryptos-backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - tencryptos-net
+
+  frontend:
+    build: ./frontend
+    container_name: tencryptos-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - tencryptos-net
+
+  db:
+    image: postgres:15
+    container_name: tencryptos-postgres
+    environment:
+      POSTGRES_USER: tencryptos
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: tencryptosdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - tencryptos-net
+
+volumes:
+  pgdata:
+
+networks:
+  tencryptos-net:
