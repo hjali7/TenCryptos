@@ -1,0 +1,33 @@
+# 🔁 Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.log
+*.db
+.venv/
+
+# 🔁 Node / Next.js
+node_modules/
+.next/
+out/
+
+# 🔁 Env / Secrets
+.env
+.env.*
+
+# 🔁 Docker
+**/Dockerfile
+**/.dockerignore
+docker-compose.override.yml
+
+# 🔁 OS/Editor Junk
+.DS_Store
+.vscode/
+.idea/
+
+# 🔁 Coverage/Test Reports
+coverage/
+*.cover
+htmlcov/
+.pytest_cache/
