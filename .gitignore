@@ -1,16 +1,17 @@
 # 🔁 Python
-*.pyc
-__pycache__/
-*.pyo
-*.pyd
-*.log
-*.db
-.venv/
+**/*.pyc
+**/__pycache__/
+**/*.pyo
+**/*.pyd
+**/*.log
+**/*.db
+**/.venv/
+**/.ven
 
 # 🔁 Node / Next.js
-node_modules/
-.next/
-out/
+**/node_modules/
+**/.next/
+**/out/
 
 # 🔁 Env / Secrets
 .env
