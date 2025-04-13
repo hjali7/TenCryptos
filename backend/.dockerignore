@@ -1,7 +1,5 @@
+# مسیر: backend/.dockerignore
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-*.log
-*.db
+.venv/
 .env
