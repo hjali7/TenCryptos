@@ -1,6 +1,8 @@
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: tencryptos-backend
     ports:
       - "8000:8000"
@@ -10,7 +12,9 @@ services:
       - tencryptos-net
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: tencryptos-frontend
     ports:
       - "3000:3000"
