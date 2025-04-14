@@ -1,28 +1,50 @@
-import { Crypto } from "@/../types/crypto"
-import { fetchCryptos } from "@/lib/api"
+"use client";
 
-export default async function Home() {
-  const data: Crypto[] = await fetchCryptos()
+import { useEffect, useState } from "react";
+
+type Crypto = {
+  symbol: string;
+  name: string;
+  price_usd: number;
+};
+
+export default function Home() {
+  const [cryptos, setCryptos] = useState<Crypto[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/cryptos/db");
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch cryptos");
+        }
+
+        const data = await res.json();
+        setCryptos(data);
+      } catch (err: any) {
+        console.error("⛔ Error fetching:", err.message);
+        setError(err.message);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
-    <main className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">💰 Top 10 Cryptos</h1>
-      <ul className="space-y-3">
-        {data.map((crypto) => (
-          <li
-            key={crypto.symbol}
-            className="bg-gray-900 rounded-lg p-4 flex justify-between items-center shadow-md"
-          >
-            <div>
-              <p className="text-lg font-semibold">{crypto.name}</p>
-              <p className="text-sm text-gray-400 uppercase">{crypto.symbol}</p>
-            </div>
-            <div className="text-right">
-              <p>${crypto.price_usd.toFixed(2)}</p>
-            </div>
+    <main className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Top 10 Cryptocurrencies</h1>
+
+      {error && <p className="text-red-500">Error: {error}</p>}
+
+      <ul>
+        {cryptos.map((crypto) => (
+          <li key={crypto.symbol} className="mb-2">
+            <strong>{crypto.name}</strong> ({crypto.symbol.toUpperCase()}): ${crypto.price_usd}
           </li>
         ))}
       </ul>
     </main>
-  )
+  );
 }

@@ -9,3 +9,4 @@ apscheduler
 bcrypt==4.0.1
 passlib[bcrypt]
 boto3
+python-dotenv
