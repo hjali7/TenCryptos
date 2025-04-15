@@ -7,16 +7,23 @@ from app.routes import db_view
 from app.core.logger import logger
 import os
 
-# 🧱 ساخت جداول
-from app.models import db_crypto
-Base.metadata.create_all(bind=engine)
+# 🧱 ساخت جداول به‌صورت خودکار
+def create_tables():
+    try:
+        from app.models import db_crypto  # 👈 اطمینان از ایمپورت مدل‌ها
+        Base.metadata.create_all(bind=engine)
+        logger.info("🧱 [DB INIT] Tables created")
+    except Exception as e:
+        logger.error(f"❌ [DB INIT ERROR] {e}")
+
+create_tables()
 
 app = FastAPI()
 
-# 🛡️ CORS حل ارور fetch در فرانت
+# 🛡️ فعال‌سازی CORS برای ارتباط با فرانت
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # اگه امنیت مهم شد، به جای "*" آدرس فرانت رو بذار
+    allow_origins=["*"],  # در محیط واقعی دامنه فرانت رو وارد کن
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,7 +41,7 @@ def update_cryptos():
     logger.info("📥 [MANUAL SYNC] Started")
     db = SessionLocal()
     try:
-        cryptos = [c.dict() for c in get_top_10_cryptos()]
+        cryptos = [c.model_dump() for c in get_top_10_cryptos()]
         upsert_cryptos(cryptos, db)
         logger.info("✅ [MANUAL SYNC] Data synced")
     except Exception as e:
