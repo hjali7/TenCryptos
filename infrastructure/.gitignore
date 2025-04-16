@@ -1,0 +1,20 @@
+# Ignore build artifacts for Go Lambdas
+**/lambda.zip
+**/bootstrap
+**/main
+
+# Python .pyc & __pycache__
+**/__pycache__/
+**/*.pyc
+
+# Editor & OS specific
+.DS_Store
+*.swp
+
+# Ignore Go binaries
+*.out
+*.exe
+
+# Ignore logs or tmp files
+*.log
+*.tmp
