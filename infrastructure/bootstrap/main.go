@@ -13,46 +13,44 @@ import (
 )
 
 func main() {
+	awsRegion := os.Getenv("AWS_REGION")
 	awsEndpoint := os.Getenv("AWS_ENDPOINT")
-	region := os.Getenv("AWS_REGION")
+	s3Bucket := os.Getenv("S3_BUCKET_NAME")
+	sqsQueueName := os.Getenv("SQS_QUEUE_NAME")
+
+	if awsRegion == "" || awsEndpoint == "" || s3Bucket == "" || sqsQueueName == "" {
+		log.Fatal("❌ One or more required environment variables are missing.")
+	}
 
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(region),
-		Endpoint:    aws.String(awsEndpoint),
-		Credentials: credentials.NewStaticCredentials("test", "test", ""),
+		Region:           aws.String(awsRegion),
+		Endpoint:         aws.String(awsEndpoint),
+		S3ForcePathStyle: aws.Bool(true), // لازم برای LocalStack
+		Credentials:      credentials.NewStaticCredentials("test", "test", ""),
 	})
 	if err != nil {
-		log.Fatalf("❌ Failed to create AWS session: %v", err)
+		log.Fatalf("❌ AWS Session error: %v", err)
 	}
 
-	createS3Bucket(sess)
-	createSQSQueue(sess)
-}
-
-func createS3Bucket(sess *session.Session) {
-	svc := s3.New(sess)
-	bucket := "tencryptos-backups"
-
-	_, err := svc.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String(bucket),
+	// S3
+	s3Svc := s3.New(sess)
+	_, err = s3Svc.CreateBucket(&s3.CreateBucketInput{
+		Bucket: aws.String(s3Bucket),
 	})
 	if err != nil {
-		fmt.Println("⚠️ Bucket may already exist:", err)
+		fmt.Println("⚠️ S3 may already exist or failed:", err)
 	} else {
-		fmt.Println("✅ Created S3 bucket:", bucket)
+		fmt.Println("✅ S3 Bucket created:", s3Bucket)
 	}
-}
 
-func createSQSQueue(sess *session.Session) {
-	svc := sqs.New(sess)
-	queue := "tencryptos-queue"
-
-	_, err := svc.CreateQueue(&sqs.CreateQueueInput{
-		QueueName: aws.String(queue),
+	// SQS
+	sqsSvc := sqs.New(sess)
+	_, err = sqsSvc.CreateQueue(&sqs.CreateQueueInput{
+		QueueName: aws.String(sqsQueueName),
 	})
 	if err != nil {
-		fmt.Println("⚠️ Queue may already exist:", err)
+		fmt.Println("⚠️ SQS may already exist or failed:", err)
 	} else {
-		fmt.Println("✅ Created SQS queue:", queue)
+		fmt.Println("✅ SQS Queue created:", sqsQueueName)
 	}
 }

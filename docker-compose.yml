@@ -38,5 +38,27 @@ services:
     command: >
       bash -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
+  go-bootstrap:
+    build:
+      context: ./infrastructure/bootstrap
+      dockerfile: Dockerfile
+    container_name: bootstrap
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_ENDPOINT: http://host.docker.internal:4566
+      S3_BUCKET_NAME: tencryptos-backups
+      SQS_QUEUE_NAME: tencryptos-queue
+    restart: on-failure
+    networks:
+      - tencryptos_net
+
 volumes:
   postgres_data:
+networks:
+  tencryptos_net:
+    driver: bridge
