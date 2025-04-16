@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:15
@@ -7,10 +9,10 @@ services:
       POSTGRES_USER: tencryptos
       POSTGRES_PASSWORD: devpass
       POSTGRES_DB: tencryptosdb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U tencryptos"]
       interval: 10s
@@ -20,52 +22,70 @@ services:
       - tencryptos_net
 
   backend:
+    container_name: tencryptos-backend
     build:
       context: ./backend
-    dockerfile: Dockerfile
-    container_name: tencryptos-backend
-    ports:
-      - "8000:8000"
+      dockerfile: Dockerfile
     env_file:
       - ./backend/.env
-    volumes:
-      - ./backend:/app
     depends_on:
       db:
         condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: >
+      bash -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-    command: >
-      bash -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     networks:
       - tencryptos_net
 
-  go-bootstrap:
+  bootstrap-go:
     build:
       context: ./infrastructure/bootstrap
-    container_name: bootstrap
-    depends_on:
-      - backend
+    container_name: bootstrap-go
     env_file:
       - ./infrastructure/bootstrap/.env
+    volumes:
+      - ./scripts:/scripts
+    depends_on:
+      - backend
+    command: ["/bin/bash", "/scripts/bootstrap_go_lambda.sh"]
     restart: on-failure
     networks:
       - tencryptos_net
 
-  setup-iam:
-    build:
-      context: ./infrastructure/iam
-    container_name: setup-iam
-    depends_on:
-      - backend
-    env_file:
-      - ./infrastructure/iam/.env
+  go-lambda-init-updater:
+    image: python:3.11
+    container_name: go-lambda-init-updater
     volumes:
       - ./scripts:/scripts
-    command: ["bash", "/scripts/setup_iam.sh"]
+      - ./infrastructure/go_lambdas/init_updater:/lambda
+    working_dir: /lambda
+    command: ["/bin/bash", "/scripts/bootstrap_go_lambdas.sh"]
+    depends_on:
+      - bootstrap-go
+    restart: on-failure
+    networks:
+      - tencryptos_net
+
+  bootstrap-iam:
+    build:
+      context: ./infrastructure/iam
+    container_name: bootstrap-iam
+    volumes:
+      - ./scripts:/scripts
+    env_file:
+      - ./infrastructure/iam/.env
+    depends_on:
+      - backend
+    command: ["/bin/bash", "/scripts/bootstrap_iam.sh"]
+    restart: on-failure
     networks:
       - tencryptos_net
 
