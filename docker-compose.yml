@@ -1,17 +1,17 @@
-# =========================
 services:
+
+  # 🛢️ PostgreSQL Database
   db:
     image: postgres:15
     container_name: tencryptos-db
-    restart: always
     environment:
       POSTGRES_USER: tencryptos
       POSTGRES_PASSWORD: devpass
       POSTGRES_DB: tencryptosdb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U tencryptos"]
       interval: 10s
@@ -20,10 +20,13 @@ services:
     networks:
       - tencryptos_net
 
+  # 🚀 Backend (FastAPI)
   backend:
     container_name: tencryptos-backend
     build:
       context: ./backend
+    volumes:
+      - ./backend:/app
     ports:
       - "8000:8000"
     env_file:
@@ -31,36 +34,64 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
     command: >
       bash -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     networks:
       - tencryptos_net
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
+  # ⚙️ Bootstrap S3 & SQS
   go-bootstrap:
     build:
       context: ./infrastructure/bootstrap
-      dockerfile: Dockerfile
-    container_name: bootstrap
+    container_name: go-bootstrap
     depends_on:
       - backend
-    environment:
-      AWS_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: test
-      AWS_SECRET_ACCESS_KEY: test
-      AWS_ENDPOINT: http://host.docker.internal:4566
     env_file:
       - ./infrastructure/bootstrap/.env
     networks:
       - tencryptos_net
     restart: on-failure
+
+  # 🔐 IAM setup
+  iam-setup:
+    build:
+      context: ./infrastructure/iam
+    container_name: iam-setup
+    volumes:
+      - ./infrastructure/requirements.txt:/app/requirements.txt
+    networks:
+      - tencryptos_net
+    env_file:
+      - ./infrastructure/iam/.env
+    depends_on:
+      - backend
+    command: ["python3", "setup_iam.py"]
+
+  # 🚀 Python Lambda deployer
+  lambda-deploy:
+    image: python:3.11
+    container_name: lambda-deploy
+    volumes:
+      - ./infrastructure/lambda:/lambda
+    working_dir: /lambda
+    networks:
+      - tencryptos_net
+    command: ["python3", "deploy_lambda.py"]
+    depends_on:
+      - backend
+
+  # 🚀 Go Lambda deployer
+  go-lambda-deploy:
+    image: golang:1.21
+    container_name: go-lambda-deploy
+    volumes:
+      - ./infrastructure/go_lambdas/init_updater:/app
+    working_dir: /app
+    networks:
+      - tencryptos_net
+    entrypoint: ["sh", "-c", "chmod +x ./build.sh && ./build.sh && python3 deploy_go_lambda.py"]
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
