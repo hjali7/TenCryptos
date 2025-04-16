@@ -1,36 +1,34 @@
+# backend/app/main.py
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.routes import db_view, devtools
+from app.core.logger import logger
 from app.core.database import SessionLocal, Base, engine
 from app.services.crypto_service import get_top_10_cryptos
 from app.crud.crypto import upsert_cryptos
-from app.routes import db_view
-from app.core.logger import logger
-import os
+from app.models import db_crypto  # برای ساخت جداول
 
-# 🧱 ساخت جداول به‌صورت خودکار
-def create_tables():
-    try:
-        from app.models import db_crypto  # 👈 اطمینان از ایمپورت مدل‌ها
-        Base.metadata.create_all(bind=engine)
-        logger.info("🧱 [DB INIT] Tables created")
-    except Exception as e:
-        logger.error(f"❌ [DB INIT ERROR] {e}")
-
-create_tables()
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# 🛡️ فعال‌سازی CORS برای ارتباط با فرانت
+# 🔐 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # در محیط واقعی دامنه فرانت رو وارد کن
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 📡 مسیرها
+# 📡 اضافه کردن مسیرها
 app.include_router(db_view.router)
+app.include_router(devtools.router)
 
 @app.get("/")
 def root():
@@ -41,7 +39,7 @@ def update_cryptos():
     logger.info("📥 [MANUAL SYNC] Started")
     db = SessionLocal()
     try:
-        cryptos = [c.model_dump() for c in get_top_10_cryptos()]
+        cryptos = [c.dict() for c in get_top_10_cryptos()]
         upsert_cryptos(cryptos, db)
         logger.info("✅ [MANUAL SYNC] Data synced")
     except Exception as e:
@@ -51,3 +49,16 @@ def update_cryptos():
         db.close()
         logger.info("🔚 [MANUAL SYNC] DB session closed")
     return {"message": "Manual sync complete"}
+
+@app.get("/cryptos")
+def get_cryptos():
+    db = SessionLocal()
+    try:
+        cryptos = db.query(db_crypto.Crypto).all()
+        return {"cryptos": [crypto.to_dict() for crypto in cryptos]}
+    except Exception as e:
+        logger.error(f"❌ [ERROR] {e}")
+        return {"error": str(e)}
+    finally:
+        db.close()
+        logger.info("🔚 [GET CRYPTOS] DB session closed")
