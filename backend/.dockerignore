@@ -1,5 +1,15 @@
-# مسیر: backend/.dockerignore
 __pycache__/
 *.pyc
-.venv/
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
 .env
+.env.*
+venv/
+.idea/
+.vscode/
+tests/
+node_modules/
+coverage/
