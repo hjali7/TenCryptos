@@ -1,5 +1,4 @@
-version: "3.8"
-
+# =========================
 services:
   db:
     image: postgres:15
@@ -48,6 +47,7 @@ services:
   go-bootstrap:
     build:
       context: ./infrastructure/bootstrap
+      dockerfile: Dockerfile
     container_name: bootstrap
     depends_on:
       - backend
