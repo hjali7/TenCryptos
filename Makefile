@@ -1,17 +1,38 @@
-.PHONY: up perms compose
+SHELL := /bin/bash
+COMPOSE = docker compose
 
-# مسیر اسکریپت‌ها
-SCRIPTS = scripts/bootstrap_go_lambdas.sh scripts/bootstrap_iam.sh scripts/bootstrap_go_lambda.sh
+# 🧱
+.DEFAULT_GOAL := help
 
-# 🎯 ست کردن permission اجرا برای اسکریپت‌ها
+# 📦 
+up: perms
+	@echo "🔼 Starting containers..."
+	@$(COMPOSE) up -d --build || (echo "❌ Failed to start containers" && exit 1)
+
+# 🛑
+down:
+	@echo "🛑 Stopping containers..."
+	@$(COMPOSE) down || (echo "❌ Failed to stop containers" && exit 1)
+
+# 🔄ا
+restart: down up
+
+# 🔍 
+logs:
+	@$(COMPOSE) logs -f --tail=100
+
+# ✅ 
 perms:
-	@echo "🔐 Setting script permissions..."
-	@chmod +x $(SCRIPTS)
+	@echo "🔧 Fixing permissions for bootstrap scripts..."
+	@chmod +x scripts/*.sh || echo "⚠️ Failed to apply script permissions"
 
-# 🎯 اجرای Docker Compose
-compose:
-	@echo "🐳 Running Docker Compose..."
-	@docker compose up --build -d
-
-# 🎯 اجرای همه با هم
-up: perms compose
+# 🆘 
+help:
+	@echo ""
+	@echo "🛠️  Available commands:"
+	@echo "   make up        ⬆️  Build & run all services"
+	@echo "   make down      ⛔ Stop all services"
+	@echo "   make restart   🔁 Restart all services"
+	@echo "   make logs      📜 View logs"
+	@echo "   make perms     🔑 Fix script permissions"
+	@echo ""

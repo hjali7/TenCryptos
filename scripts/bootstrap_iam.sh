@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "📦 Installing Python dependencies..."
 pip install --no-cache-dir -r ../infrastructure/requirements.txt

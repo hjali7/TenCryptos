@@ -74,7 +74,7 @@ services:
 
   bootstrap-iam:
     build:
-      context: ./infrastructure/iam
+      context: .
       dockerfile: Dockerfile
     container_name: bootstrap-iam
     volumes:
@@ -83,7 +83,7 @@ services:
       - ./infrastructure/iam/.env
     depends_on:
       - backend
-    command: ["/bin/bash", "/scripts/bootstrap_iam.sh"]
+    command: ["sh", "./scripts/bootstrap_iam.sh"]
     restart: on-failure
     networks:
       - tencryptos_net

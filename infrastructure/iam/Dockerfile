@@ -2,10 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt ./requirements.txt
-COPY setup_iam.py .
-COPY setup_cw_role.py .
+COPY infrastructure/iam/requirements.txt ./requirements.txt
+COPY infrastructure/iam/setup_iam.py .
+COPY infrastructure/iam/setup_cw_role.py .
+COPY scripts/bootstrap_iam.sh ./bootstrap_iam.sh
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN chmod +x bootstrap_iam.sh && \
+    pip install --no-cache-dir -r requirements.txt
 
-CMD ["python3", "setup_iam.py"]
+CMD ["sh","./bootstrap_iam.sh"]
