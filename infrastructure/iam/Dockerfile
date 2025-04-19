@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY ./requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 COPY setup_iam.py .
 COPY setup_cw_role.py .
 

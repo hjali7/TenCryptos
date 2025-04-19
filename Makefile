@@ -11,7 +11,7 @@ perms:
 # 🎯 اجرای Docker Compose
 compose:
 	@echo "🐳 Running Docker Compose..."
-	@docker compose up --build
+	@docker compose up --build -d
 
 # 🎯 اجرای همه با هم
 up: perms compose
