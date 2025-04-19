@@ -86,4 +86,11 @@ clean:
 rebuild-svc:
 	@$(COMPOSE) build --no-cache $(svc)
 
+deploy-lambda:
+	docker build -t lambda-deployer ./infrastructure/lambda
+	docker run --rm \
+		--network=tencryptos_net \
+		--env-file=./infrastructure/lambda/.env \
+		lambda-deployer
+		
 .PHONY: up down restart logs rebuild compose perms cloudwatch-logs sync show-db s3-list sqs-send sqs-receive clean rebuild-svc
