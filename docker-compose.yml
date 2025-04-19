@@ -77,6 +77,7 @@ services:
   bootstrap-iam:
     build:
       context: ./infrastructure/iam
+      dockerfile: Dockerfile
     container_name: bootstrap-iam
     volumes:
       - ./scripts:/scripts
