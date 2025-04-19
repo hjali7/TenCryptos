@@ -1,6 +1,5 @@
 # Ignore build artifacts for Go Lambdas
 **/lambda.zip
-**/bootstrap
 **/main
 
 # Python .pyc & __pycache__

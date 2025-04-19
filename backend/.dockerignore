@@ -8,8 +8,8 @@ __pycache__/
 .env
 .env.*
 venv/
+.venv/
 .idea/
 .vscode/
 tests/
-node_modules/
 coverage/

@@ -18,7 +18,6 @@
 .env.*
 
 # 🔁 Docker
-**/.dockerignore
 docker-compose.override.yml
 # 🔁 OS/Editor Junk
 .DS_Store

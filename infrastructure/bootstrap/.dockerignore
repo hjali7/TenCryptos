@@ -1,0 +1,9 @@
+*.log
+*.exe
+*.out
+*.test
+vendor/
+.vscode/
+.idea/
+.env
+*.env

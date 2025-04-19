@@ -46,6 +46,7 @@ services:
   bootstrap-go:
     build:
       context: ./infrastructure/bootstrap
+      # dockerfile: Dockerfile
     container_name: bootstrap-go
     env_file:
       - ./infrastructure/bootstrap/.env
@@ -53,7 +54,7 @@ services:
       - ./scripts:/scripts
     depends_on:
       - backend
-    command: ["/bin/bash", "/scripts/bootstrap_go_lambda.sh"]
+    command: ["/bin/sh", "/scripts/bootstrap_go_lambda.sh"]
     restart: on-failure
     networks:
       - tencryptos_net
@@ -75,7 +76,7 @@ services:
   bootstrap-iam:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./infrastructure/iam/Dockerfile
     container_name: bootstrap-iam
     volumes:
       - ./scripts:/scripts
