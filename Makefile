@@ -94,3 +94,13 @@ deploy-lambda:
 		lambda-deployer
 		
 .PHONY: up down restart logs rebuild compose perms cloudwatch-logs sync show-db s3-list sqs-send sqs-receive clean rebuild-svc
+
+# ==============
+# deploay  lambda
+
+deploy-lambda:
+	docker build -t lambda-deployer ./infrastructure/lambda
+	docker run --rm \
+		--network=tencryptos_net \
+		--env-file=./infrastructure/lambda/.env \
+		lambda-deployer
