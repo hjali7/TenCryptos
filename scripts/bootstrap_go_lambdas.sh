@@ -3,7 +3,7 @@
 echo "🚀 Running Go Lambda bootstrap..."
 
 # مسیر به لامبدای go
-LAMBDA_DIR="init_updater"
+LAMBDA_DIR="/lambda"
 
 # بررسی وجود فایل
 if [ -f "$LAMBDA_DIR/build.sh" ]; then

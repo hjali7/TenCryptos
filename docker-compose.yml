@@ -46,11 +46,12 @@ services:
   bootstrap-go:
     build:
       context: ./infrastructure/bootstrap
-      # dockerfile: Dockerfile
+      dockerfile: Dockerfile
     container_name: bootstrap-go
     env_file:
       - ./infrastructure/bootstrap/.env
     volumes:
+      - ./infrastructure/go_lambdas/init_updater:/lambda
       - ./scripts:/scripts
     depends_on:
       - backend
