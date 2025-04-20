@@ -51,12 +51,9 @@ services:
     container_name: bootstrap-go
     env_file:
       - ./infrastructure/bootstrap/.env
-    volumes:
-      - ./infrastructure/go_lambdas/init_updater:/lambda
-      - ./scripts:/scripts
     depends_on:
       - backend
-    command: ["/bin/sh", "/scripts/bootstrap_go_lambda.sh"]
+    command: ["./bootstrap"]
     restart: on-failure
     networks:
       - tencryptos_net
