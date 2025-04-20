@@ -5,6 +5,7 @@ echo "🚀 Running Go Lambda bootstrap..."
 cd /lambda || exit 1
 
 echo "🔨 Building Go Lambda..."
+chmod +x ./build.sh
 ./build.sh
 
 if [ $? -ne 0 ]; then

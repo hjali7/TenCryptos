@@ -11,7 +11,7 @@ PROJECT_NAME=tencryptos
 # ========================
 
 ## Run everything from scratch (build + up + scripts)
-up: perms compose post-up
+up: perms compose
 	@echo "✅ Project started successfully!"
 
 ## Stop and remove all containers
@@ -94,3 +94,28 @@ deploy-lambda:
 		lambda-deployer
 		
 .PHONY: up down restart logs rebuild compose perms cloudwatch-logs sync show-db s3-list sqs-send sqs-receive clean rebuild-svc
+
+
+prebuild-go-lambda:
+	@echo "🔧 Prebuilding Go Lambda outside Docker..."
+	cd infrastructure/go_lambdas/init_updater && \
+	chmod +x build.sh && \
+	./build.sh
+
+## 🦾 Deploy Go Lambda
+
+go-lambda-updater:	perms
+	@echo "🚀 Running Go Lambda Updater container..."
+	@docker run --rm \
+		--env-file=./infrastructure/go_lambdas/init_updater/.env \
+		--network=tencryptos_tencryptos_net \
+		-v $(PWD)/scripts:/scripts \
+		-v $(PWD)/infrastructure/go_lambdas/init_updater:/lambda \
+		go-lambda-updater:1.0.0 \
+		/bin/bash /scripts/bootstrap_go_lambdas.sh
+
+## 🔨Build Go Lambda Updater Image
+
+build-go-lambda-updater-image:
+	@echo "🚀 Creating Image go-lambda-updater ..."
+	@docker build -t go-lambda-updater:1.0.0 ./infrastructure/go_lambdas/init_updater

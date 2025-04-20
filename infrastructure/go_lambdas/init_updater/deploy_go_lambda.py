@@ -2,18 +2,28 @@ import boto3
 import zipfile
 import os
 import time
+from dotenv import load_dotenv
 from botocore.exceptions import ClientError
 
-LAMBDA_FUNCTION_NAME = "GoInitUpdater"
-ZIP_PATH = "lambda.zip"
-ROLE_ARN = "arn:aws:iam::000000000000:role/lambda-role"  # فرضی برای localstack
+load_dotenv()
+
+LAMBDA_FUNCTION_NAME = os.getenv('LAMBDA_FUNCTION_NAME')
+ZIP_PATH = os.getenv("ZIP_PATH")
+ROLE_ARN = os.getenv("ROLE_ARN")
+
+REGION_NAME=os.getenv("REGION_NAME")
+AWS_ENDPOINT=os.getenv("AWS_ENDPOINT")
+AWS_ACCESS_KEY_ID=os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY=os.getenv("AWS_SECRET_ACCESS_KEY")
+
+
 
 lambda_client = boto3.client(
     "lambda",
-    region_name="us-east-1",
-    endpoint_url="http://localhost:4566",
-    aws_access_key_id="test",
-    aws_secret_access_key="test"
+    region_name=REGION_NAME,
+    endpoint_url=AWS_ENDPOINT,
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY
 )
 
 def deploy():
@@ -33,7 +43,6 @@ def deploy():
     except lambda_client.exceptions.ResourceConflictException:
         print("🔁 Lambda exists. Updating...")
 
-        # اینجا یه مکث کوتاه کمک می‌کنه اگر هنوز در حال پردازشه
         time.sleep(2)
 
         try:

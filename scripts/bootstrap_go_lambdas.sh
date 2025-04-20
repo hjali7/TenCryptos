@@ -1,20 +1,14 @@
 #!/bin/bash
 
-echo "🚀 Running Go Lambda bootstrap..."
+echo "🚀 Running Go Lambda deployment..."
 
-# مسیر به لامبدای go
-LAMBDA_DIR="/lambda"
+cd /lambda || exit 1
 
-# بررسی وجود فایل
-if [ -f "$LAMBDA_DIR/build.sh" ]; then
-  echo "🔧 Setting permission for build.sh..."
-  chmod +x "$LAMBDA_DIR/build.sh"
+echo "📦 Deploying Lambda..."
+python3 deploy_go_lambda.py
 
-  echo "🔨 Building Lambda..."
-  "$LAMBDA_DIR/build.sh"
-
-  echo "✅ Build completed."
+if [ $? -eq 0 ]; then
+    echo "✅ Go Lambda deployed successfully!"
 else
-  echo "❌ build.sh not found in $LAMBDA_DIR"
-  exit 1
+    echo "❌ Failed to deploy Go Lambda"
 fi
