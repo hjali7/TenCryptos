@@ -3,7 +3,8 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
-
+from app.devtools import router as devtools_router
+from app.routes import devtools_tools
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import db_view, devtools
@@ -11,7 +12,7 @@ from app.core.logger import logger
 from app.core.database import SessionLocal, Base, engine
 from app.services.crypto_service import get_top_10_cryptos
 from app.crud.crypto import upsert_cryptos
-from app.models import db_crypto  # برای ساخت جداول
+from app.models import db_crypto 
 
 Base.metadata.create_all(bind=engine)
 
@@ -29,6 +30,8 @@ app.add_middleware(
 # 📡 اضافه کردن مسیرها
 app.include_router(db_view.router)
 app.include_router(devtools.router)
+app.include_router(devtools_tools.router, prefix="/devtools-tools")
+
 
 @app.get("/")
 def root():
