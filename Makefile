@@ -101,3 +101,43 @@ clean:
 	@docker system prune -a --volumes
 
 .PHONY: up down restart logs rebuild rebuild-svc perms lambda-deploy go-lambda-up go-lambda-updater sync show-db s3-list sqs-send sqs-receive cloudwatch-logs clean
+
+
+# ========================
+# 🧱 LOCALSTACK COMMANDS
+# ========================
+
+## Run LocalStack (standalone from separate docker-compose)
+localstack-up:
+	@echo "🟢 Starting LocalStack..."
+	@docker compose -f docker-compose.localstack.yml up -d
+	@sleep 5
+	@if [ "$$(docker inspect -f '{{.State.Running}}' localstack 2>/dev/null)" = "true" ]; then \
+		echo "✅ LocalStack started successfully!"; \
+	else \
+		echo "❌ LocalStack failed to start."; \
+	fi
+
+localstack-down:
+	@echo "🔴 Stopping LocalStack..."
+	@docker compose -f docker-compose.localstack.yml down
+	@sleep 2
+	@if [ "$$(docker inspect -f '{{.State.Running}}' localstack 2>/dev/null)" = "false" ]; then \
+		echo "✅ LocalStack stopped successfully!"; \
+	else \
+		echo "❌ LocalStack failed to stop."; \
+	fi
+
+localstack-logs:
+	@echo "📜 LocalStack logs:"
+	@docker compose -f docker-compose.localstack.yml logs -f --tail=100
+
+localstack-restart:
+	@echo "🔄 Restarting LocalStack..."
+	@docker compose -f docker-compose.localstack.yml restart
+	@sleep 5
+	@if [ "$$(docker inspect -f '{{.State.Running}}' localstack 2>/dev/null)" = "true" ]; then \
+		echo "✅ LocalStack restarted successfully!"; \
+	else \
+		echo "❌ LocalStack failed to restart."; \
+	fi

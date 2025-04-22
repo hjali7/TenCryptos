@@ -1,0 +1,31 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    restart: always
+    ports:
+      - "4566:4566"  # LocalStack Gateway
+      - "4510-4559:4510-4559"  # External services
+    env_file:
+      - .env # Load environment variables from .env file
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEBUG=1
+      - LAMBDA_EXECUTOR=docker
+      - LAMBDA_REMOTE_DOCKER=false
+      - LAMBDA_DOCKER_NETWORK=tencryptos_net
+      - DATA_DIR=/var/lib/localstack
+    volumes:
+      - ./localstack:/var/lib/localstack
+      - var/run/docker.sock:/var/run/docker.sock
+      - ./scripts:/scripts
+    networks:
+      - tencryptos_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+networks:
+    tencryptos_net:
+      driver: bridge

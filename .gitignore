@@ -29,3 +29,8 @@ coverage/
 *.cover
 htmlcov/
 .pytest_cache/
+
+
+# localstack data
+.localstack/
+**/localstack/
