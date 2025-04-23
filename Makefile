@@ -141,3 +141,8 @@ localstack-restart:
 	else \
 		echo "❌ LocalStack failed to restart."; \
 	fi
+
+create-secrets:
+	@echo "🔑 creating secrets in localstack..."
+	@docker exec -it localstack bash -c "/scripts/create_secrets.sh"
+	@echo "✅ Secrets created in LocalStack!"
