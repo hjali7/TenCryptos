@@ -11,7 +11,7 @@ PROJECT_NAME=tencryptos
 # ========================
 
 ## Run full stack
-up: perms compose
+up: perms compose-up
 	@echo "✅ Project started successfully!"
 
 ## Stop all
@@ -31,7 +31,7 @@ rebuild:
 	@$(COMPOSE) build --no-cache
 	@echo "🔁 Rebuild complete."
 
-## Rebuild single
+## Rebuild single service
 rebuild-svc:
 	@$(COMPOSE) build --no-cache $(svc)
 
@@ -41,6 +41,12 @@ rebuild-svc:
 perms:
 	@chmod +x scripts/*.sh || true
 	@echo "🔐 Permissions set for scripts."
+
+# ========================
+# 🔨 COMPOSE UP
+# ========================
+compose-up:
+	@$(COMPOSE) up -d --build || (echo '❌ Failed to start containers' && exit 1)
 
 # ========================
 # 🐍 PYTHON LAMBDA DEPLOY
@@ -100,14 +106,11 @@ cloudwatch-logs:
 clean:
 	@docker system prune -a --volumes
 
-.PHONY: up down restart logs rebuild rebuild-svc perms lambda-deploy go-lambda-up go-lambda-updater sync show-db s3-list sqs-send sqs-receive cloudwatch-logs clean
-
-
 # ========================
 # 🧱 LOCALSTACK COMMANDS
 # ========================
 
-## Run LocalStack (standalone from separate docker-compose)
+## Run LocalStack (standalone)
 localstack-up:
 	@echo "🟢 Starting LocalStack..."
 	@docker compose -f docker-compose.localstack.yml up -d
@@ -146,3 +149,12 @@ create-secrets:
 	@echo "🔑 creating secrets in localstack..."
 	@docker exec -it localstack bash -c "/scripts/create_secrets.sh"
 	@echo "✅ Secrets created in LocalStack!"
+
+.PHONY: \
+	up down restart logs rebuild rebuild-svc \
+	perms compose-up \
+	lambda-deploy go-lambda-up go-lambda-updater \
+	sync show-db s3-list sqs-send sqs-receive \
+	cloudwatch-logs clean \
+	localstack-up localstack-down localstack-logs localstack-restart \
+	create-secrets
