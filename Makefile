@@ -158,3 +158,7 @@ create-secrets:
 	cloudwatch-logs clean \
 	localstack-up localstack-down localstack-logs localstack-restart \
 	create-secrets
+
+create-stack:
+	@echo "📦 Creating CloudFormation stack..."
+	@sh infrastructure/cloudformation/deploy_stack.sh

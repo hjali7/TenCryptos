@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template to deploy SQS queue, Lambda and permissions
+
+Resources:
+
+  TenCryptosQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: tencryptos-queue
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaSQSPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  SQSLoggerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: SQSLoggerFunction
+      Runtime: python3.11
+      Handler: sqs_logger.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: your-s3-bucket-name
+        S3Key: sqs_logger.zip
+      Events:
+        SQSQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt TenCryptosQueue.Arn
+            BatchSize: 1
+
+Outputs:
+  QueueArn:
+    Description: ARN of the SQS Queue
+    Value: !GetAtt TenCryptosQueue.Arn
+
+  LambdaFunctionArn:
+    Description: ARN of the Lambda function
+    Value: !GetAtt SQSLoggerFunction.Arn
