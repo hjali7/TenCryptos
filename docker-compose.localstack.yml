@@ -17,7 +17,7 @@ services:
       - DATA_DIR=/var/lib/localstack
     volumes:
       - ./localstack:/var/lib/localstack
-      - var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./scripts:/scripts
     networks:
       - tencryptos_net
